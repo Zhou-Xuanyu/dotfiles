@@ -96,8 +96,7 @@ alias ls="eza -lh --group-directories-first --icons=auto"   # modern ls with ico
 alias grep="grep --color=auto"                               # colorized grep output
 
 # Bare git repo for dotfile management (see: atlassian.com/git/tutorials/dotfiles)
-alias config='git --git-dir=~/.cfg --work-tree=~'
-
+alias config="git --git-dir=$HOME/.cfg --work-tree=$HOME"
 
 # ============================================================
 # ENVIRONMENT
