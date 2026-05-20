@@ -1,0 +1,4 @@
+[[mgr.prepend_keymap]]
+on = "o"
+run = "create"
+desc = "use o to create file or folder instead of a"
