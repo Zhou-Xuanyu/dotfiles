@@ -1,2 +1,3 @@
 # screencapture
 alt - a : screencapture -i -c
+alt + shift - a : screencapture -i ~/Downloads/screenshot-$(date +%Y%m%d-%H%M%S).png
