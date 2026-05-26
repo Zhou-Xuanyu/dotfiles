@@ -1,5 +1,8 @@
 theme = Gruvbox Dark
 font-family = BlexMono Nerd Font
+font-family = PingFang SC
+font-family = Source Han Sans SC VF
+# 一直
 # font-family = JetBrainsMono Nerd Font Mono
 resize-overlay=never
 font-size=24
