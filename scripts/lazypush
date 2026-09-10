@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# if user provided arguments → use them as commit message
+if [ "$#" -gt 0 ]; then
+  msg="$*"
+else
+  # otherwise prompt for one
+  printf "Commit message: "
+  read -r msg
+fi
+
+git pull || exit 1
+git add -A 
+
+# If message is empty, protect from empty commit message
+if [ -z "$msg" ]; then
+  echo "Error: commit message cannot be empty."
+  exit 1
+fi
+
+git commit -m "$msg" && git push
