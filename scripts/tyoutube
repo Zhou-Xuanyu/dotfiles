@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+#############################################
+# claude generated code which haven't be check by human
+# it is currently working though
+#############################################
+# toggle-youtube.sh — ban or unban YouTube via Caddyfile + /etc/hosts
+set -euo pipefail
+
+CADDYFILE="/opt/homebrew/etc/Caddyfile"
+HOSTSFILE="/etc/hosts"
+YOUTUBE_HOSTS=(youtube.com www.youtube.com m.youtube.com youtu.be music.youtube.com)
+
+is_banned() {
+    grep -q "^127\.0\.0\.1 youtube\.com" "$HOSTSFILE"
+}
+
+toggle_hosts() {
+    local action="$1"  # ban | unban
+    for host in "${YOUTUBE_HOSTS[@]}"; do
+        escaped="${host//./\\.}"
+        if [[ "$action" == "ban" ]]; then
+            # remove leading # if present
+            sudo sed -i '' "s/^#\(127\.0\.0\.1 ${escaped}\)/\1/" "$HOSTSFILE"
+        else
+            # add leading # if not already commented
+            sudo sed -i '' "s/^\(127\.0\.0\.1 ${escaped}\)/#\1/" "$HOSTSFILE"
+        fi
+    done
+}
+
+toggle_caddy() {
+    local action="$1"  # ban | unban
+    python3 - "$CADDYFILE" "$action" <<'PYEOF'
+import sys, re
+
+path, action = sys.argv[1], sys.argv[2]
+with open(path) as f:
+    content = f.read()
+
+pattern = r'(# BEGIN_YOUTUBE_BAN\n)(.*?)(# END_YOUTUBE_BAN)'
+
+def transform(m):
+    start, body, end = m.group(1), m.group(2), m.group(3)
+    lines = body.split('\n')
+    if action == 'ban':
+        # ban = activate caddy redirect (uncomment)
+        lines = [(l[1:] if l.startswith('#') else l) for l in lines]
+    else:
+        # unban = deactivate caddy redirect (comment out)
+        lines = [('#' + l if l and not l.startswith('#') else l) for l in lines]
+    return start + '\n'.join(lines) + end
+
+content = re.sub(pattern, transform, content, flags=re.DOTALL)
+with open(path, 'w') as f:
+    f.write(content)
+PYEOF
+}
+
+if is_banned; then
+    echo "YouTube: BANNED → unbanning"
+    toggle_hosts unban
+    toggle_caddy unban
+    ACTION="unbanned"
+else
+    echo "YouTube: UNBANNED → banning"
+    toggle_hosts ban
+    toggle_caddy ban
+    ACTION="banned"
+fi
+
+echo "Reloading Caddy..."
+caddy reload --config "$CADDYFILE"
+
+echo "Flushing DNS cache..."
+sudo dscacheutil -flushcache
+sudo killall -HUP mDNSResponder
+
+echo "YouTube $ACTION."

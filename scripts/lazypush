@@ -1,21 +1,30 @@
 #!/bin/sh
+# tell system to run by /bin/sh in other words bash or dash
 
-# if user provided arguments → use them as commit message
 if [ "$#" -gt 0 ]; then
+# nearlly forgot the mention -gt means greater than
+# obvious you can understand the IF format here
+# what inobvious is the $#, $ means constants in many language, $# is the number of argument
   msg="$*"
+# $* means consider all arguments as single string, pretty useful
+# normally use $0,1,2 to refer to a specific argument
 else
   # otherwise prompt for one
   printf "Commit message: "
   read -r msg
+  # -r here to avoid using slash to escape, eg /n as new line
 fi
 
-git pull || exit 1
-git add -A 
 
-# If message is empty, protect from empty commit message
 if [ -z "$msg" ]; then
+# -z test for empty string
   echo "Error: commit message cannot be empty."
   exit 1
 fi
 
-git commit -m "$msg" && git push
+git add -A
+git commit -m "$msg" 
+git pull --rebase || exit 1
+git push || exit 1
+
+

@@ -1,0 +1,3 @@
+#!/bin/zsh
+export PYTHONSTARTUP="$HOME/uiuc/phy214/physics_setup.py"
+exec "$HOME/uiuc/phy214/.venv/bin/python" "$@"
