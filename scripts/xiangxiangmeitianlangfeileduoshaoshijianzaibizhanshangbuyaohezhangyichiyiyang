@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# unban bilibili (see .bilibili_lib.sh); excluded from zsh history in ~/.zshrc
+set -euo pipefail
+source "$(dirname "$0")/.bilibili_lib.sh"
+
+ensure_hosts
+ensure_caddy
+
+if ! is_banned; then
+    echo "bilibili already unbanned."
+    exit 0
+fi
+
+toggle_hosts unban
+toggle_caddy unban
+reload_all
+echo "bilibili unbanned."
